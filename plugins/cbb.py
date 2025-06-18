@@ -18,7 +18,6 @@ async def cb_handler(client: Bot, query: CallbackQuery):
     data = query.data
 
     if data == "help":
-        # <<< MODIFIED: Fetch custom help text from DB >>>
         help_text_setting = await db.get_setting("help_text")
         text = help_text_setting['value'] if help_text_setting else HELP_TXT
 
@@ -32,7 +31,6 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "about":
-        # <<< MODIFIED: Fetch custom about text from DB >>>
         about_text_setting = await db.get_setting("about_text")
         text = about_text_setting['value'] if about_text_setting else ABOUT_TXT
 
@@ -46,8 +44,10 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "start":
-        # This part now fetches its content dynamically from start.py,
-        # but we need to reconstruct the buttons here for the back button.
+        # <<< --- THIS IS THE FIXED PART --- >>>
+        # It now deletes the old message and sends a new one with the photo.
+        await query.message.delete()
+
         start_pic_setting = await db.get_setting("start_pic")
         start_text_setting = await db.get_setting("start_text")
         channel_button_setting = await db.get_setting("channel_button")
@@ -63,22 +63,25 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         else:
             buttons.append([InlineKeyboardButton("• THETECHSAVAGE CHANNELS •", url="https://t.me/TheTechSavageTelegram")])
         
-        buttons.append([
-                [InlineKeyboardButton("ʜᴇʟᴘ", callback_data='help'),
-                 InlineKeyboardButton("ᴀʙᴏᴜᴛ", callback_data='about')]
-            ])
+        buttons.append(
+            [InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data='about'),
+             InlineKeyboardButton('ʜᴇʟᴘ •', callback_data='help')]
+        )
 
-        await query.message.edit_text(
-            text=text.format(
+        # Send a new photo message instead of editing
+        await client.send_photo(
+            chat_id=query.message.chat.id,
+            photo=pic,
+            caption=text.format(
                 first=query.from_user.first_name,
                 last=query.from_user.last_name,
                 username=f"@{query.from_user.username}" if query.from_user.username else "N/A",
                 mention=query.from_user.mention,
                 id=query.from_user.id
             ),
-            disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(buttons)
         )
+
 
     elif data == "close":
         await query.message.delete()
