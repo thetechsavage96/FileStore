@@ -32,6 +32,8 @@ class Rohit:
         self.rqst_fsub_data = self.database['request_forcesub']
         self.rqst_fsub_Channel_data = self.database['request_forcesub_channel']
         
+        # <<< NEW: Collection for bot settings >>>
+        self.settings_data = self.database['settings']
 
 
     # USER DATA
@@ -184,15 +186,24 @@ class Rohit:
     async def reqChannel_exist(self, channel_id: int):
     # Get the list of all channel IDs from the database
         channel_ids = await self.show_channels()
-        #print(f"All channel IDs in the database: {channel_ids}")
-
-    # Check if the given channel_id is in the list of channel IDs
         if channel_id in channel_ids:
-            #print(f"Channel {channel_id} found in the database.")
             return True
         else:
-            #print(f"Channel {channel_id} NOT found in the database.")
             return False
+
+    # <<< --- NEW FUNCTIONS FOR BOT CUSTOMIZATION --- >>>
+
+    async def update_setting(self, name: str, value):
+        """Saves or updates a setting in the database."""
+        await self.settings_data.update_one(
+            {'_id': name},
+            {'$set': {'value': value}},
+            upsert=True
+        )
+
+    async def get_setting(self, name: str):
+        """Retrieves a setting from the database."""
+        return await self.settings_data.find_one({'_id': name})
 
 
 db = Rohit(DB_URI, DB_NAME)
