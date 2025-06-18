@@ -12,7 +12,6 @@
 
 import asyncio
 import html
-import traceback # <<< ADDED FOR DEBUGGING
 from pyrogram import Client, filters, __version__
 from pyrogram.enums import ParseMode, ChatAction
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
@@ -116,48 +115,40 @@ async def start_command(client: Client, message: Message):
         return
     
     else:
-        # <<< --- DEBUGGING BLOCK ADDED --- >>>
-        try:
-            start_pic_setting = await db.get_setting("start_pic")
-            start_text_setting = await db.get_setting("start_text")
-            channel_button_setting = await db.get_setting("channel_button")
+        start_pic_setting = await db.get_setting("start_pic")
+        start_text_setting = await db.get_setting("start_text")
+        channel_button_setting = await db.get_setting("channel_button")
 
-            pic = start_pic_setting['value'] if start_pic_setting else START_PIC
-            text = start_text_setting['value'] if start_text_setting else START_MSG
+        pic = start_pic_setting['value'] if start_pic_setting else START_PIC
+        text = start_text_setting['value'] if start_text_setting else START_MSG
 
-            buttons = []
-            if channel_button_setting:
-                btn_text = channel_button_setting['value']['text']
-                btn_url = channel_button_setting['value']['url']
-                buttons.append([InlineKeyboardButton(btn_text, url=btn_url)])
-            else:
-                buttons.append([InlineKeyboardButton("• THETECHSAVAGE CHANNELS •", url="https://t.me/TheTechSavageTelegram")])
+        buttons = []
+        if channel_button_setting:
+            btn_text = channel_button_setting['value']['text']
+            btn_url = channel_button_setting['value']['url']
+            buttons.append([InlineKeyboardButton(btn_text, url=btn_url)])
+        else:
+            buttons.append([InlineKeyboardButton("• THETECHSAVAGE CHANNELS •", url="https://t.me/TheTechSavageTelegram")])
 
-            buttons.append([
-                InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="about"),
-                InlineKeyboardButton('ʜᴇʟᴘ •', callback_data="help")
-            ])
-            
-            reply_markup = InlineKeyboardMarkup(buttons)
+        buttons.append([
+            InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="about"),
+            InlineKeyboardButton('ʜᴇʟᴘ •', callback_data="help")
+        ])
+        
+        reply_markup = InlineKeyboardMarkup(buttons)
 
-            await message.reply_photo(
-                photo=pic,
-                caption=text.format(
-                    first=html.escape(message.from_user.first_name),
-                    last=html.escape(message.from_user.last_name or ''),
-                    username=f"@{message.from_user.username}" if message.from_user.username else "N/A",
-                    mention=message.from_user.mention,
-                    id=message.from_user.id
-                ),
-                reply_markup=reply_markup,
-                message_effect_id=5104841245755180586
-            )
-        except Exception as e:
-            # This will print the exact error to your server's log
-            print("--- ERROR IN /start HANDLER ---")
-            traceback.print_exc()
-            print("-----------------------------")
-            await message.reply("Sorry, a critical error occurred while generating the start message. Please check the logs for details.")
+        await message.reply_photo(
+            photo=pic,
+            caption=text.format(
+                first=html.escape(message.from_user.first_name),
+                last=html.escape(message.from_user.last_name or ''),
+                username=f"@{message.from_user.username}" if message.from_user.username else "N/A",
+                mention=message.from_user.mention,
+                id=message.from_user.id
+            ),
+            reply_markup=reply_markup,
+            message_effect_id=5104841245755180586
+        )
         return
 
 async def not_joined(client: Client, message: Message):
