@@ -1,7 +1,7 @@
 # Gemini AI @Google
 
 from pyrogram import Client, filters
-from pyrogram.types import Message
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from bot import Bot
 from database.database import db
 from helper_func import admin
@@ -73,3 +73,60 @@ async def set_channel_button(client: Bot, message: Message):
             "<b>Usage:</b> <code>/set_channel_button [URL] [Button Text]</code>\n\n"
             "<b>Example:</b> <code>/set_channel_button https://t.me/TheTechSavageTelegram Visit My Channel</code>"
         )
+
+
+# --- List All Commands ---
+
+# <<< CHANGED from "command" to "commands" >>>
+@Bot.on_message(filters.command("commands") & filters.private & admin)
+async def command_list(client: Bot, message: Message):
+    # Text for the command list
+    command_text = """
+<b>Here is the full list of available commands:</b>
+
+<blockquote><b>🤖 General Bot Commands</b></blockquote>
+
+<code>/start</code> - Starts the bot.
+<code>/batch</code> - Creates a link for a range of messages.
+<code>/genlink</code> - Creates a link for a single message.
+<code>/custom_batch</code> - Creates a batch link from multiple forwarded messages.
+<code>/dlt_time</code> - Sets auto-delete time for files sent by the bot.
+<code>/check_dlt_time</code> - Checks the current auto-delete time.
+<code>/stats</code> - Shows bot uptime and stats.
+<code>/users</code> - Shows the total number of users.
+
+<blockquote><b>⚙️ Customization Commands (Admin Only)</b></blockquote>
+
+<i>(Reply to a message/photo to use these)</i>
+<code>/set_start_text</code> - Sets the welcome message.
+<code>/set_about_text</code> - Sets the 'About' page text.
+<code>/set_help_text</code> - Sets the 'Help' page text.
+<code>/set_start_pic</code> - Sets the welcome picture.
+
+<i>(Use with arguments)</i>
+<code>/set_channel_button [URL] [Text]</code> - Sets the main URL button on the start message.
+<code>/commands</code> - Displays this command list.
+
+<blockquote><b>🛡️ Admin & User Management</b></blockquote>
+
+<code>/add_admin</code> & <code>/deladmin</code> - Add or remove a bot admin.
+<code>/admins</code> - View the list of bot admins.
+<code>/ban</code> & <code>/unban</code> - Ban or unban a user from the bot.
+<code>/banlist</code> - View all banned users.
+
+<blockquote><b>📣 Channel Management</b></blockquote>
+
+<code>/addchnl</code> & <code>/delchnl</code> - Add or remove a Force Subscribe channel.
+<code>/listchnl</code> - View all Force Subscribe channels.
+<code>/fsub_mode</code> - Toggle request-to-join mode for a channel.
+"""
+
+    reply_markup = InlineKeyboardMarkup(
+        [[InlineKeyboardButton("❌ Close", callback_data="close")]]
+    )
+
+    await message.reply(
+        text=command_text,
+        reply_markup=reply_markup,
+        disable_web_page_preview=True
+    )
